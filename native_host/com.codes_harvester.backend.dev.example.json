@@ -1,0 +1,9 @@
+{
+  "name": "com.codes_harvester.backend.dev",
+  "description": "Starts the isolated Codes Harvester DEV backend",
+  "path": "/absolute/path/to/get-qr-code-avito/native_host/avito_backend_host.py",
+  "type": "stdio",
+  "allowed_origins": [
+    "chrome-extension://YOUR_DEV_EXTENSION_ID/"
+  ]
+}

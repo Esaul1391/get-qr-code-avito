@@ -1,0 +1,10 @@
+.env
+.idea/
+.runtime/
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+avito.db
+/backend/data/listing_cities.json
+/backend/logs/

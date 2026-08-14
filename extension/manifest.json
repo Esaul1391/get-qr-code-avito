@@ -1,0 +1,23 @@
+{
+  "manifest_version": 3,
+  "name": "Codes Harvester DEV",
+  "short_name": "Harvester DEV",
+  "version": "0.7.0",
+  "description": "Изолированная DEV-копия: сбор заказов и отзывов Avito, синхронизация объявлений.",
+  "permissions": ["storage", "scripting", "tabs", "declarativeContent", "nativeMessaging"],
+  "host_permissions": ["https://www.avito.ru/*", "http://127.0.0.1:8011/*"],
+  "background": { "service_worker": "background.js", "type": "module" },
+  "action": { "default_popup": "popup.html", "default_title": "Codes Harvester DEV" },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.avito.ru/orders*",
+        "https://www.avito.ru/brands/*",
+        "https://www.avito.ru/profile/*"
+      ],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "icons": { "16": "icons/icon16.png", "48": "icons/icon48.png", "128": "icons/icon128.png" }
+}

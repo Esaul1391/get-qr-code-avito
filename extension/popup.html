@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <div id="dev-banner" class="dev-banner">DEV · порт 8011 · печать отключена</div>
+    <h3>Avito Helper DEV</h3>
+
+    <button id="btn-collect">Собрать</button>
+    <button id="btn-send" disabled>Отправить отзывы</button>
+    <button id="btn-print" disabled style="display:none;">Проверить печать</button>
+    <button id="btn-sync-listings" disabled style="display:none;">Синхронизировать объявления</button>
+    <button id="btn-open-listings" style="display:none;">Открыть папку объявлений</button>
+    <button id="btn-open-orders" disabled style="display:none;">Открыть заказы за сегодня</button>
+
+    <div id="city-filter" class="card" style="display:none;">
+      <label class="checkbox-row">
+        <input id="filter-by-city" type="checkbox" disabled />
+        <span>Собирать заказы только для города</span>
+      </label>
+      <select id="selected-city" disabled>
+        <option value="Москва">Москва</option>
+        <option value="Энгельс">Энгельс</option>
+      </select>
+      <div id="city-settings-status" class="muted"></div>
+    </div>
+
+    <button id="ping">Проверить DEV backend</button>
+    <div id="status"></div>
+
+    <div id="hint"></div>
+
+    <!-- Окошко со сводкой по отзывам -->
+    <div id="summary" class="card" style="display: none"></div>
+
+    <script src="popup.js"></script>
+  </body>
+</html>
