@@ -1,5 +1,4 @@
 const $collect = document.getElementById("btn-collect");
-const $send    = document.getElementById("btn-send");
 const $print   = document.getElementById("btn-print"); // NEW
 const $syncListings = document.getElementById("btn-sync-listings");
 const $openListings = document.getElementById("btn-open-listings");
@@ -9,16 +8,15 @@ const $filterByCity = document.getElementById("filter-by-city");
 const $selectedCity = document.getElementById("selected-city");
 const $citySettingsStatus = document.getElementById("city-settings-status");
 const $devBanner = document.getElementById("dev-banner");
+const $devBannerText = document.getElementById("dev-banner-text");
 const $hint    = document.getElementById("hint");
 const btn      = document.getElementById("ping");
 const status   = document.getElementById("status");
-const $summary = document.getElementById("summary");
 
-let currentMode = "none"; // "orders" | "reviews" | "listings" | "none"
+let currentMode = "none"; // "orders" | "listings" | "none"
 
 // Данные после Collect
 let lastOrders = null;
-let lastReviews = null;
 
 function sendRuntimeMessage(message) {
   return new Promise((resolve) => chrome.runtime.sendMessage(message, resolve));
@@ -43,9 +41,9 @@ async function ensureBackendOnPopupOpen() {
   status.className = "ok";
 
   const backend = response.data?.backend || {};
-  if ($devBanner) {
+  if ($devBanner && $devBannerText) {
     const printEnabled = Boolean(backend.print_enabled);
-    $devBanner.textContent = printEnabled
+    $devBannerText.textContent = printEnabled
       ? "DEV · порт 8011 · ВНИМАНИЕ: печать включена"
       : "DEV · порт 8011 · печать отключена";
     $devBanner.classList.toggle("print-enabled", printEnabled);
@@ -116,55 +114,6 @@ async function persistCitySettings() {
 
 init().catch(console.error);
 
-// ------------------------ SUMMARY UI ------------------------
-
-function hideSummary() {
-  if (!$summary) return;
-  $summary.style.display = "none";
-  $summary.innerHTML = "";
-}
-
-function renderSummary(selectionData) {
-  if (!$summary) return;
-
-  if (!Array.isArray(selectionData) || selectionData.length === 0) {
-    $summary.style.display = "block";
-    $summary.innerHTML = `
-      <h4>Сводка по отзывам</h4>
-      <div class="muted">Нет “прибыльных” товаров (backend мог отфильтровать результаты).</div>
-    `;
-    return;
-  }
-
-  const rows = selectionData
-    .filter(x => Array.isArray(x) && x.length >= 2)
-    .map(([title, cnt]) => `
-      <div class="summary-item">
-        <div>${escapeHtml(String(title))}</div>
-        <div class="badge">${Number(cnt) || 0}</div>
-      </div>
-    `)
-    .join("");
-
-  $summary.style.display = "block";
-  $summary.innerHTML = `
-    <h4>Сводка по отзывам (top)</h4>
-    ${rows}
-    <div class="muted" style="margin-top:8px;">
-      Число справа — сколько раз товар встретился в отзывах.
-    </div>
-  `;
-}
-
-function escapeHtml(s) {
-  return s
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
-}
-
 // ------------------------ INIT ------------------------
 
 async function init() {
@@ -172,13 +121,9 @@ async function init() {
   currentMode = detectMode(tab?.url);
   await ensureBackendOnPopupOpen();
 
-  const ok = currentMode === "orders" || currentMode === "reviews";
+  const ok = currentMode === "orders";
   if ($collect) $collect.disabled = !ok;
   if ($collect) $collect.style.display = ok ? "block" : "none";
-
-  if ($send) $send.disabled = true;
-
-  hideSummary();
 
   if ($print) {
     $print.disabled = true;
@@ -205,20 +150,13 @@ async function init() {
 
   if (currentMode === "orders") {
     $hint.textContent = "Готово: вы на странице заказов.";
-    if ($send) $send.style.display = "none";
     if ($print) $print.style.display = "block"; // показываем только на orders
     await loadCitySettings();
-  } else if (currentMode === "reviews") {
-    $hint.textContent = "Готово: вы на странице отзывов продавца.";
-    if ($send) $send.style.display = "block";
-    if ($print) $print.style.display = "none";
   } else if (currentMode === "listings") {
     $hint.textContent = "Нажмите кнопку, чтобы загрузить все страницы и синхронизировать города объявлений.";
-    if ($send) $send.style.display = "none";
     if ($print) $print.style.display = "none";
   } else {
-    $hint.textContent = "Откройте страницу заказов, отзывов или своих объявлений на avito.ru.";
-    if ($send) $send.style.display = "none";
+    $hint.textContent = "Откройте страницу заказов или своих объявлений на avito.ru.";
     if ($print) $print.style.display = "none";
   }
 
@@ -311,12 +249,10 @@ async function init() {
     $collect.onclick = async () => {
       if (!ok || !tab?.id) return;
 
-      hideSummary();
-
       if ($print) $print.disabled = true;
       if ($openOrders) $openOrders.disabled = true;
 
-      const type = currentMode === "orders" ? "COLLECT_ORDERS" : "COLLECT_REVIEWS";
+      const type = "COLLECT_ORDERS";
 
       if (currentMode === "orders") {
         $hint.textContent = "Загружаю всю историю заказов Avito...";
@@ -381,52 +317,7 @@ async function init() {
           if ($openOrders) $openOrders.disabled = selectedCount === 0;
         });
 
-        return;
       }
-
-      // ---------------- REVIEWS (RAW) ----------------
-      lastReviews = Array.isArray(resp.reviews) ? resp.reviews : [];
-      const count = lastReviews.length;
-
-      $hint.textContent = `Собрано отзывов (raw): ${count}.`;
-      if ($send) $send.disabled = count === 0;
-    };
-  }
-
-  if ($send) {
-    $send.onclick = async () => {
-      if (currentMode !== "reviews") return;
-      if (!tab?.id) return;
-
-      const reviews = Array.isArray(lastReviews) ? lastReviews : [];
-      const count = reviews.length;
-
-      if (count === 0) {
-        $hint.textContent = "Нечего отправлять: сначала нажми Collect.";
-        return;
-      }
-
-      hideSummary();
-      $hint.textContent = `Отправляю отзывы на backend... (count: ${count})`;
-
-      const payload = {
-        source: "avito",
-        collectedAt: Date.now(),
-        pageUrl: tab.url || null,
-        reviews,
-      };
-
-      chrome.runtime.sendMessage({ type: "SEND_FEEDBACK", payload }, (r) => {
-        if (!r?.ok) {
-          $hint.textContent = "Не отправилось на backend: " + (r?.error || "unknown");
-          return;
-        }
-
-        const selectionData = r?.data?.data || null;
-
-        $hint.textContent = `Отправлено отзывов ✔ (sent: ${count})`;
-        renderSummary(selectionData);
-      });
     };
   }
 
@@ -491,7 +382,6 @@ function detectMode(url) {
   try {
     const u = new URL(url);
     if (isOrdersUrl(u))  return "orders";
-    if (isReviewsUrl(u)) return "reviews";
     if (isListingsUrl(u)) return "listings";
     return "none";
   } catch {
@@ -514,23 +404,6 @@ function isOrdersUrl(u) {
     (u.host === "www.avito.ru" || u.host === "m.avito.ru") &&
     u.pathname.startsWith("/orders")
   );
-}
-
-function isReviewsUrl(u) {
-  if (!(u.host === "www.avito.ru" || u.host === "m.avito.ru")) return false;
-
-  if (u.pathname.startsWith("/brands/") && u.searchParams.has("sellerId")) {
-    return true;
-  }
-
-  if (
-    /\/user\//.test(u.pathname) &&
-    (u.search.includes("review") || /review|otzyv|otzyvy/i.test(u.pathname))
-  ) {
-    return true;
-  }
-
-  return false;
 }
 
 // ------------------------ PING BUTTON ------------------------

@@ -8,13 +8,12 @@ from backend.app.constant import (
     DEV_BACKEND_PORT,
     PRINT_ORDERS_ENABLED,
 )
-from backend.app.schemas import CitySettingsPayload, FeedbackRawPayload, ListingsSyncPayload
+from backend.app.schemas import CitySettingsPayload, ListingsSyncPayload
 from backend.app.service import (
     create_qr_codes,
     get_collect_data,
     open_collected_orders_directory,
     open_synced_listings_directory,
-    parse_data,
     print_search_orders,
     read_city_settings,
     save_city_settings,
@@ -75,15 +74,6 @@ def open_orders_folder():
         return {"ok": True, **open_collected_orders_directory()}
     except RuntimeError as error:
         raise HTTPException(status_code=500, detail=str(error)) from error
-
-
-@router.post("/parse_feedback")
-def parse_feedback(payload: FeedbackRawPayload = Body(...)):
-    res = parse_data(payload)
-    if res:
-        print(res)
-        return {"ok": True, "data": res}
-    return {"ok": True}
 
 
 @router.get("/get_collect_data")

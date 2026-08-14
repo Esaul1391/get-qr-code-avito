@@ -6,7 +6,6 @@ import {
   pingBackend,
   printNewOrders,
   saveCitySettings,
-  sendFeedback,
   sendOrders,
   syncListings,
 } from "./backendClient.js";
@@ -57,7 +56,6 @@ function ensureBackendRunning() {
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   const backendActions = {
     SEND_ORDERS: () => sendOrders(message.payload),
-    SEND_FEEDBACK: () => sendFeedback(message.payload),
     SYNC_LISTINGS: () => syncListings(message.payload),
     GET_CITY_SETTINGS: () => getCitySettings(),
     SAVE_CITY_SETTINGS: () => saveCitySettings(message.payload),
@@ -93,9 +91,6 @@ chrome.runtime.onInstalled.addListener(async () => {
     conditions: [
       new chrome.declarativeContent.PageStateMatcher({
         pageUrl: { hostEquals: "www.avito.ru", pathPrefix: "/orders" }
-      }),
-      new chrome.declarativeContent.PageStateMatcher({
-        pageUrl: { hostEquals: "www.avito.ru", pathPrefix: "/brands" }
       }),
       new chrome.declarativeContent.PageStateMatcher({
         pageUrl: { hostEquals: "www.avito.ru", pathPrefix: "/profile" }

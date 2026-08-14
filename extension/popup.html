@@ -5,35 +5,69 @@
     <link rel="stylesheet" href="popup.css" />
   </head>
   <body>
-    <div id="dev-banner" class="dev-banner">DEV · порт 8011 · печать отключена</div>
-    <h3>Avito Helper DEV</h3>
+    <div class="popup-shell">
+      <header class="app-header">
+        <div class="logo-frame">
+          <img src="icons/icon48.png" alt="" class="app-logo" />
+        </div>
+        <div class="app-title">
+          <h1>Avito Helper DEV</h1>
+          <p>Codes Harvester</p>
+        </div>
+      </header>
 
-    <button id="btn-collect">Собрать</button>
-    <button id="btn-send" disabled>Отправить отзывы</button>
-    <button id="btn-print" disabled style="display:none;">Проверить печать</button>
-    <button id="btn-sync-listings" disabled style="display:none;">Синхронизировать объявления</button>
-    <button id="btn-open-listings" style="display:none;">Открыть папку объявлений</button>
-    <button id="btn-open-orders" disabled style="display:none;">Открыть заказы за сегодня</button>
+      <div id="dev-banner" class="dev-banner">
+        <span class="pulse-dot"></span>
+        <span id="dev-banner-text">DEV · порт 8011 · печать отключена</span>
+      </div>
 
-    <div id="city-filter" class="card" style="display:none;">
-      <label class="checkbox-row">
-        <input id="filter-by-city" type="checkbox" disabled />
-        <span>Собирать заказы только для города</span>
-      </label>
-      <select id="selected-city" disabled>
-        <option value="Москва">Москва</option>
-        <option value="Энгельс">Энгельс</option>
-      </select>
-      <div id="city-settings-status" class="muted"></div>
+      <main>
+        <div class="action-stack">
+          <button id="btn-collect" class="action primary">
+            Собрать
+          </button>
+          <button id="btn-print" class="action accent" disabled style="display:none;">
+            Проверить печать
+          </button>
+          <button id="btn-sync-listings" class="action primary" disabled style="display:none;">
+            Синхронизировать объявления
+          </button>
+          <button id="btn-open-listings" class="action secondary" style="display:none;">
+            Открыть папку объявлений
+          </button>
+          <button id="btn-open-orders" class="action secondary" disabled style="display:none;">
+            Открыть заказы за сегодня
+          </button>
+        </div>
+
+        <section id="city-filter" class="card city-card" style="display:none;">
+          <div class="section-label">Фильтр заказов</div>
+          <label class="checkbox-row">
+            <input id="filter-by-city" type="checkbox" disabled />
+            <span>Собирать заказы только для города</span>
+          </label>
+          <div class="select-wrap">
+            <select id="selected-city" disabled>
+              <option value="Москва">Москва</option>
+              <option value="Энгельс">Энгельс</option>
+            </select>
+          </div>
+          <div id="city-settings-status" class="muted"></div>
+        </section>
+
+        <section class="connection-card">
+          <div class="connection-head">
+            <span class="section-label">Подключение к backend</span>
+            <div id="status"></div>
+          </div>
+          <button id="ping" class="action ghost">
+            Проверить DEV backend
+          </button>
+        </section>
+
+        <div id="hint"></div>
+      </main>
     </div>
-
-    <button id="ping">Проверить DEV backend</button>
-    <div id="status"></div>
-
-    <div id="hint"></div>
-
-    <!-- Окошко со сводкой по отзывам -->
-    <div id="summary" class="card" style="display: none"></div>
 
     <script src="popup.js"></script>
   </body>

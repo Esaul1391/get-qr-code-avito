@@ -2,13 +2,6 @@ from datetime import date
 from pydantic import BaseModel, Field
 
 
-class FeedbackRawPayload(BaseModel):
-    source: str | None = "avito"
-    collectedAt: int | None = None
-    pageUrl: str | None = None
-    reviews: list
-
-
 class ProductSchema(BaseModel):
     name: str
     quantity: int

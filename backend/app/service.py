@@ -1,4 +1,3 @@
-from collections import Counter
 from sqlalchemy.orm import Session
 
 from backend.app.qr_code_adapter import (
@@ -13,11 +12,9 @@ from backend.app.listing_cities import (
     save_listing_blocks,
     update_city_settings,
 )
-from backend.app.parser_feedback import parser_all_feedback
 from backend.app.repositories import ProductsRepo
 from backend.app.schemas import (
     CitySettingsPayload,
-    FeedbackRawPayload,
     ListingsSyncPayload,
     ProductSchema,
 )
@@ -51,20 +48,6 @@ def open_synced_listings_directory():
 
 def open_collected_orders_directory():
     return {"directory": open_today_orders_directory()}
-
-
-def parse_data(data: FeedbackRawPayload):
-    items = parser_all_feedback(data.reviews)
-    if not items:
-        return None
-    data_orders = Counter(items).most_common(4)
-    if not data_orders:
-        return None
-    selection_data = [data for data in data_orders if isinstance(data, tuple) and data[-1] >= 4]
-    if not selection_data:
-        print('There are no profitable products')
-        return None
-    return selection_data
 
 
 def get_collect_data(db: Session) -> list[ProductSchema]:

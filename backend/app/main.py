@@ -3,7 +3,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from .config import settings
-from .routers import router as reviews_router
+from .routers import router as parse_router
 
 from .database import Base, engine
 
@@ -13,7 +13,7 @@ Base.metadata.create_all(bind=engine)
 def create_app() -> FastAPI:
     app = FastAPI(
         title=settings.app_name,
-        version="0.7.0-dev",
+        version="0.8.1-dev",
     )
 
     app.add_middleware(
@@ -25,7 +25,7 @@ def create_app() -> FastAPI:
     )
 
     # Подключаем роутеры HTTP-API
-    app.include_router(reviews_router)
+    app.include_router(parse_router)
 
     return app
 

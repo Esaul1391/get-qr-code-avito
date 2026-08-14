@@ -38,10 +38,6 @@ export function sendOrders(payload) {
   return postJson("/parse/code_bild", payload);
 }
 
-export function sendFeedback(payload) {
-  return postJson("/parse/parse_feedback", payload);
-}
-
 export function syncListings(payload) {
   return postJson("/parse/listings/sync", payload);
 }
