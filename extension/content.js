@@ -202,7 +202,10 @@ async function loadAllOrderRowsAsync() {
   captureVisibleOrderRows(capturedRows);
 
   // Два прохода без новых карточек нужны для ленивой загрузки после прокрутки.
-  for (let attempt = 0; attempt < 100 && stableRounds < 2; attempt++) {
+  // Для повседневной работы достаточно нескольких порций свежих заказов.
+  // Ограничиваем прокрутку, чтобы сбор не уходил глубоко в историю.
+  const maxLoadAttempts = 4;
+  for (let attempt = 0; attempt < maxLoadAttempts && stableRounds < 2; attempt++) {
     const previousCount = capturedRows.size;
     const loadMoreButton = findLoadMoreOrdersButton();
 

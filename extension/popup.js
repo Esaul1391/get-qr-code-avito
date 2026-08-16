@@ -324,7 +324,7 @@ async function init() {
       const type = "COLLECT_ORDERS";
 
       if (currentMode === "orders") {
-        $hint.textContent = "Загружаю всю историю заказов Avito...";
+        $hint.textContent = "Загружаю свежие заказы Avito...";
       }
 
       let resp;
