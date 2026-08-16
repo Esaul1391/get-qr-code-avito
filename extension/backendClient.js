@@ -21,8 +21,12 @@ async function postJson(path, payload) {
   });
 
   if (!res.ok) {
-    const text = await res.text().catch(() => "");
-    throw new Error(`POST failed: ${res.status} ${text}`);
+    const responseText = await res.text().catch(() => "");
+    let details = responseText;
+    try {
+      details = JSON.parse(responseText)?.detail || responseText;
+    } catch {}
+    throw new Error(details || `POST failed: ${res.status}`);
   }
 
   return res.json();
@@ -48,6 +52,14 @@ export function getCitySettings() {
 
 export function saveCitySettings(payload) {
   return postJson("/parse/city-settings", payload);
+}
+
+export function getLabelSettings() {
+  return getJson("/parse/labels/settings");
+}
+
+export function saveLabelSettings(payload) {
+  return postJson("/parse/labels/settings", payload);
 }
 
 export function openListingsDirectory() {

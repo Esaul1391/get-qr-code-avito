@@ -1,3 +1,4 @@
+import os
 import shutil
 import subprocess
 from pathlib import Path
@@ -6,6 +7,13 @@ from pathlib import Path
 def open_directory(directory: Path) -> str:
     directory = directory.resolve()
     directory.mkdir(parents=True, exist_ok=True)
+
+    if os.name == "nt":
+        try:
+            os.startfile(str(directory))
+        except (AttributeError, OSError) as error:
+            raise RuntimeError(f"Не удалось открыть папку: {error}") from error
+        return str(directory)
 
     xdg_open = shutil.which("xdg-open")
     gio = shutil.which("gio")

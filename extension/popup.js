@@ -7,6 +7,10 @@ const $cityFilter = document.getElementById("city-filter");
 const $filterByCity = document.getElementById("filter-by-city");
 const $selectedCity = document.getElementById("selected-city");
 const $citySettingsStatus = document.getElementById("city-settings-status");
+const $labelDirectorySettings = document.getElementById("label-directory-settings");
+const $labelsDirectory = document.getElementById("labels-directory");
+const $saveLabelsDirectory = document.getElementById("btn-save-labels-directory");
+const $labelsDirectoryStatus = document.getElementById("labels-directory-status");
 const $devBanner = document.getElementById("dev-banner");
 const $devBannerText = document.getElementById("dev-banner-text");
 const $hint    = document.getElementById("hint");
@@ -112,6 +116,64 @@ async function persistCitySettings() {
     formatCityCounts(settings.city_counts);
 }
 
+function renderLabelSettings(settings, saved = false) {
+  if (!$labelsDirectory || !$labelsDirectoryStatus) return;
+
+  const directory = settings?.labels_directory || "";
+  $labelsDirectory.value = settings?.is_custom ? directory : "";
+  $labelsDirectory.placeholder = directory || "/home/user/AvitoLabels или C:\\AvitoLabels";
+  $labelsDirectoryStatus.textContent =
+    `${saved ? "Путь сохранён. " : "Текущая папка: "}${directory}` +
+    "\nВнутри автоматически создаётся подпапка с датой.";
+}
+
+async function loadLabelSettings() {
+  if (!$labelDirectorySettings || !$labelsDirectory || !$saveLabelsDirectory) return;
+
+  $labelDirectorySettings.style.display = "block";
+  $labelsDirectory.disabled = true;
+  $saveLabelsDirectory.disabled = true;
+  if ($labelsDirectoryStatus) $labelsDirectoryStatus.textContent = "Загружаю путь...";
+
+  const response = await sendRuntimeMessage({ type: "GET_LABEL_SETTINGS" });
+  if (!response?.ok) {
+    if ($labelsDirectoryStatus) {
+      $labelsDirectoryStatus.textContent =
+        "Не удалось загрузить путь: " + (response?.error || "unknown");
+    }
+    return;
+  }
+
+  renderLabelSettings(response.data || {});
+  $labelsDirectory.disabled = false;
+  $saveLabelsDirectory.disabled = false;
+}
+
+async function persistLabelSettings() {
+  if (!$labelsDirectory || !$saveLabelsDirectory || !$labelsDirectoryStatus) return;
+
+  $labelsDirectory.disabled = true;
+  $saveLabelsDirectory.disabled = true;
+  $labelsDirectoryStatus.textContent = "Проверяю и сохраняю путь...";
+
+  const value = $labelsDirectory.value.trim();
+  const response = await sendRuntimeMessage({
+    type: "SAVE_LABEL_SETTINGS",
+    payload: { labels_directory: value || null },
+  });
+
+  $labelsDirectory.disabled = false;
+  $saveLabelsDirectory.disabled = false;
+
+  if (!response?.ok) {
+    $labelsDirectoryStatus.textContent =
+      "Не удалось сохранить путь: " + (response?.error || "unknown");
+    return;
+  }
+
+  renderLabelSettings(response.data || {}, true);
+}
+
 init().catch(console.error);
 
 // ------------------------ INIT ------------------------
@@ -147,11 +209,12 @@ async function init() {
   }
 
   if ($cityFilter) $cityFilter.style.display = "none";
+  if ($labelDirectorySettings) $labelDirectorySettings.style.display = "none";
 
   if (currentMode === "orders") {
     $hint.textContent = "Готово: вы на странице заказов.";
     if ($print) $print.style.display = "block"; // показываем только на orders
-    await loadCitySettings();
+    await Promise.all([loadCitySettings(), loadLabelSettings()]);
   } else if (currentMode === "listings") {
     $hint.textContent = "Нажмите кнопку, чтобы загрузить все страницы и синхронизировать города объявлений.";
     if ($print) $print.style.display = "none";
@@ -162,6 +225,12 @@ async function init() {
 
   if ($filterByCity) $filterByCity.onchange = persistCitySettings;
   if ($selectedCity) $selectedCity.onchange = persistCitySettings;
+  if ($saveLabelsDirectory) $saveLabelsDirectory.onclick = persistLabelSettings;
+  if ($labelsDirectory) {
+    $labelsDirectory.onkeydown = (event) => {
+      if (event.key === "Enter") persistLabelSettings();
+    };
+  }
 
   if ($openListings) {
     $openListings.onclick = async () => {

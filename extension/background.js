@@ -1,11 +1,13 @@
 // background.js
 import {
   getCitySettings,
+  getLabelSettings,
   openListingsDirectory,
   openOrdersDirectory,
   pingBackend,
   printNewOrders,
   saveCitySettings,
+  saveLabelSettings,
   sendOrders,
   syncListings,
 } from "./backendClient.js";
@@ -30,7 +32,23 @@ async function ensureBackendRunningOnce() {
     const backend = await pingBackend();
     return { started: false, backend };
   } catch {
-    const nativeResponse = await sendNativeBackendMessage({ type: "START_BACKEND" });
+    let nativeResponse;
+    try {
+      nativeResponse = await sendNativeBackendMessage({ type: "START_BACKEND" });
+    } catch (error) {
+      const details = error?.message || String(error);
+      if (/native messaging host not found/i.test(details)) {
+        throw new Error(
+          "DEV Native Host не установлен. Выполните ./scripts/install_native_host_dev.sh и перезапустите Chrome."
+        );
+      }
+      if (/access to the specified native messaging host is forbidden/i.test(details)) {
+        throw new Error(
+          "ID DEV-расширения не разрешён в Native Host. Повторно выполните ./scripts/install_native_host_dev.sh."
+        );
+      }
+      throw error;
+    }
     if (!nativeResponse?.ok) {
       throw new Error(nativeResponse?.error || "Native host не запустил backend");
     }
@@ -59,6 +77,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     SYNC_LISTINGS: () => syncListings(message.payload),
     GET_CITY_SETTINGS: () => getCitySettings(),
     SAVE_CITY_SETTINGS: () => saveCitySettings(message.payload),
+    GET_LABEL_SETTINGS: () => getLabelSettings(),
+    SAVE_LABEL_SETTINGS: () => saveLabelSettings(message.payload),
     OPEN_LISTINGS_DIRECTORY: () => openListingsDirectory(),
     OPEN_ORDERS_DIRECTORY: () => openOrdersDirectory(),
     PRINT_ORDERS: () => printNewOrders(),

@@ -25,3 +25,7 @@ class ListingsSyncPayload(BaseModel):
 class CitySettingsPayload(BaseModel):
     filter_enabled: bool = False
     selected_city: str = "Москва"
+
+
+class LabelSettingsPayload(BaseModel):
+    labels_directory: str | None = None

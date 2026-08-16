@@ -13,13 +13,33 @@ from PIL import Image, ImageDraw, ImageFont
 from backend.app.config import settings
 from backend.app.desktop import open_directory
 from backend.app.constant import PRINT_ORDERS_COMMAND, PRINT_ORDERS_ENABLED
+from backend.app.label_settings import get_labels_directory
 
 
 ORDERS_ROOT = settings.resolved_runtime_dir / "orders"
 
 
+def _load_label_font(size: int) -> ImageFont.FreeTypeFont | ImageFont.ImageFont:
+    candidates = [Path("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf")]
+    if os.name == "nt":
+        windows_directory = Path(os.environ.get("WINDIR", r"C:\Windows"))
+        candidates.extend(
+            [
+                windows_directory / "Fonts" / "arial.ttf",
+                windows_directory / "Fonts" / "segoeui.ttf",
+            ]
+        )
+
+    for font_path in candidates:
+        try:
+            return ImageFont.truetype(str(font_path), size)
+        except (OSError, ValueError):
+            continue
+    return ImageFont.load_default()
+
+
 def get_today_orders_directory() -> Path:
-    return ORDERS_ROOT / str(date.today())
+    return get_labels_directory(ORDERS_ROOT) / str(date.today())
 
 
 def open_today_orders_directory() -> str:
@@ -126,16 +146,9 @@ def create_label(
     LABEL_W = 885
     LABEL_H = 1417
 
-    # --- Fonts ---
-    try:
-        font_main = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 34)
-    except Exception:
-        font_main = ImageFont.load_default()
-
-    try:
-        font_order = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 42)
-    except Exception:
-        font_order = ImageFont.load_default()
+    # DejaVu Sans используется в Linux, Arial/Segoe UI — в Windows.
+    font_main = _load_label_font(34)
+    font_order = _load_label_font(42)
 
     # Размеры оставляем стандартными: python-barcode задаёт их в миллиметрах.
     # Номер ниже мы рисуем самостоятельно, поэтому встроенный текст отключаем.

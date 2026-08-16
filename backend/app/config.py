@@ -12,6 +12,7 @@ class Settings(BaseSettings):
     app_name: str = "Codes Harvester DEV Backend"
     runtime_dir: Path = PROJECT_ROOT / ".runtime" / "dev"
     database_url: str | None = None
+    labels_dir: Path | None = None
     print_enabled: bool = False
     printer_name: str = "XP-DT426B"
     sql_echo: bool = False
@@ -26,6 +27,12 @@ class Settings(BaseSettings):
     @property
     def resolved_runtime_dir(self) -> Path:
         return self.runtime_dir.expanduser().resolve()
+
+    @property
+    def default_labels_dir(self) -> Path:
+        if self.labels_dir is not None:
+            return self.labels_dir.expanduser().resolve()
+        return self.resolved_runtime_dir / "orders"
 
 
 settings = Settings()

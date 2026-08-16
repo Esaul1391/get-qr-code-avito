@@ -8,7 +8,11 @@ from backend.app.constant import (
     DEV_BACKEND_PORT,
     PRINT_ORDERS_ENABLED,
 )
-from backend.app.schemas import CitySettingsPayload, ListingsSyncPayload
+from backend.app.schemas import (
+    CitySettingsPayload,
+    LabelSettingsPayload,
+    ListingsSyncPayload,
+)
 from backend.app.service import (
     create_qr_codes,
     get_collect_data,
@@ -16,7 +20,9 @@ from backend.app.service import (
     open_synced_listings_directory,
     print_search_orders,
     read_city_settings,
+    read_label_settings,
     save_city_settings,
+    save_label_settings,
     sync_listing_cities,
 )
 
@@ -57,6 +63,19 @@ def set_city_settings(payload: CitySettingsPayload = Body(...)):
     try:
         return {"ok": True, **save_city_settings(payload)}
     except ValueError as error:
+        raise HTTPException(status_code=400, detail=str(error)) from error
+
+
+@router.get("/labels/settings")
+def get_label_settings():
+    return read_label_settings()
+
+
+@router.post("/labels/settings")
+def set_label_settings(payload: LabelSettingsPayload = Body(...)):
+    try:
+        return {"ok": True, **save_label_settings(payload)}
+    except (ValueError, OSError) as error:
         raise HTTPException(status_code=400, detail=str(error)) from error
 
 

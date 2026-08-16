@@ -184,6 +184,13 @@ button.secondary {
   background: var(--surface);
 }
 
+button.compact {
+  min-height: 40px;
+  margin-top: 9px;
+  padding: 8px 12px;
+  font-size: 14px;
+}
+
 .card,
 .connection-card {
   margin-top: 12px;
@@ -232,6 +239,35 @@ select {
   background: var(--surface);
   font: inherit;
   font-size: 14px;
+}
+
+.path-input {
+  width: 100%;
+  margin-top: 11px;
+  padding: 10px;
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  color: var(--text);
+  background: var(--surface);
+  font: inherit;
+  font-size: 13px;
+}
+
+.path-input::placeholder {
+  color: #858c96;
+}
+
+.path-help {
+  margin-top: 7px;
+  color: var(--text-muted);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+#labels-directory-status {
+  margin-top: 9px;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
 }
 
 select:disabled,

@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Codes Harvester DEV",
   "short_name": "Harvester DEV",
-  "version": "0.8.1",
+  "version": "0.9.0",
   "description": "Изолированная DEV-копия: сбор заказов Avito и синхронизация объявлений.",
   "permissions": ["storage", "scripting", "tabs", "declarativeContent", "nativeMessaging"],
   "host_permissions": ["https://www.avito.ru/*", "http://127.0.0.1:8011/*"],

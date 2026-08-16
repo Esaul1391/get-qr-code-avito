@@ -13,7 +13,7 @@ Base.metadata.create_all(bind=engine)
 def create_app() -> FastAPI:
     app = FastAPI(
         title=settings.app_name,
-        version="0.8.1-dev",
+        version="0.9.0-dev",
     )
 
     app.add_middleware(

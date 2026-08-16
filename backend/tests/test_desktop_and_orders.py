@@ -27,6 +27,21 @@ class DesktopAndOrdersTests(unittest.TestCase):
                 start_new_session=True,
             )
 
+    def test_open_directory_uses_startfile_on_windows(self):
+        with tempfile.TemporaryDirectory() as directory:
+            target = Path(directory) / "orders"
+            with (
+                patch.object(desktop.os, "name", "nt"),
+                patch.object(desktop.os, "startfile", create=True) as startfile,
+                patch.object(desktop.subprocess, "Popen") as process,
+            ):
+                opened = desktop.open_directory(target)
+
+            self.assertEqual(opened, str(target.resolve()))
+            self.assertTrue(target.is_dir())
+            startfile.assert_called_once_with(str(target.resolve()))
+            process.assert_not_called()
+
     def test_open_today_orders_directory_uses_dated_folder(self):
         with tempfile.TemporaryDirectory() as directory:
             orders_root = Path(directory) / "orders"

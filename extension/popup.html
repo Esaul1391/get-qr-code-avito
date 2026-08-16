@@ -55,6 +55,26 @@
           <div id="city-settings-status" class="muted"></div>
         </section>
 
+        <section id="label-directory-settings" class="card path-card" style="display:none;">
+          <label class="section-label" for="labels-directory">
+            Папка сохранения этикеток
+          </label>
+          <input
+            id="labels-directory"
+            class="path-input"
+            type="text"
+            placeholder="/home/user/AvitoLabels или C:\AvitoLabels"
+            autocomplete="off"
+            spellcheck="false"
+            disabled
+          />
+          <button id="btn-save-labels-directory" class="action secondary compact" disabled>
+            Сохранить путь
+          </button>
+          <div id="labels-directory-status" class="muted"></div>
+          <div class="path-help">Очистите поле и сохраните, чтобы вернуть стандартную папку.</div>
+        </section>
+
         <section class="connection-card">
           <div class="connection-head">
             <span class="section-label">Подключение к backend</span>

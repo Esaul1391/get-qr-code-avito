@@ -12,7 +12,11 @@ from urllib.request import urlopen
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
-PYTHON_EXECUTABLE = PROJECT_ROOT / ".venv" / "bin" / "python"
+PYTHON_EXECUTABLE = (
+    PROJECT_ROOT / ".venv" / "Scripts" / "python.exe"
+    if os.name == "nt"
+    else PROJECT_ROOT / ".venv" / "bin" / "python"
+)
 BACKEND_PORT = 8011
 BACKEND_INSTANCE = "codes-harvester-dev"
 BACKEND_URL = f"http://127.0.0.1:{BACKEND_PORT}/parse/ping"
@@ -57,15 +61,22 @@ def start_backend() -> dict[str, Any]:
 
     try:
         with LOG_FILE.open("ab") as log:
-            process = subprocess.Popen(
-                command,
-                cwd=str(PROJECT_ROOT),
-                stdin=subprocess.DEVNULL,
-                stdout=log,
-                stderr=subprocess.STDOUT,
-                start_new_session=True,
-                env={**os.environ, "PYTHONUNBUFFERED": "1"},
-            )
+            process_options: dict[str, Any] = {
+                "cwd": str(PROJECT_ROOT),
+                "stdin": subprocess.DEVNULL,
+                "stdout": log,
+                "stderr": subprocess.STDOUT,
+                "env": {**os.environ, "PYTHONUNBUFFERED": "1"},
+            }
+            if os.name == "nt":
+                process_options["creationflags"] = (
+                    getattr(subprocess, "CREATE_NEW_PROCESS_GROUP", 0)
+                    | getattr(subprocess, "DETACHED_PROCESS", 0)
+                )
+            else:
+                process_options["start_new_session"] = True
+
+            process = subprocess.Popen(command, **process_options)
     except OSError as error:
         return {"ok": False, "error": f"Не удалось запустить backend: {error}"}
 
